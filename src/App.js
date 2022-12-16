@@ -1,7 +1,7 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
-import { List } from './overview/list-component/index.tsx';
+import { Table } from './overview/table-component/index.ts';
 
 const darkTheme = createTheme({
   palette: {
@@ -14,7 +14,7 @@ function App() {
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <main>
-        <List />
+        <Table />
       </main>
     </ThemeProvider>
   );
