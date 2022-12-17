@@ -56,6 +56,15 @@ export const Table = () => {
           return (
             <TextField
               {...params}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  (startAdornment as [])?.forEach((e: React.ReactElement) => {
+                    arr.push(e.props.label);
+                  });
+
+                  setSearchValue(arr);
+                }
+              }}
               value={input}
               onChange={({ target }) => setInput(target.value)}
               onBlur={() => {
