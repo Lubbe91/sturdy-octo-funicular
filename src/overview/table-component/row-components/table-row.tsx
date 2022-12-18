@@ -1,16 +1,13 @@
+import React, { useState } from 'react';
 import { TableRow as MuiTableRow, TableCell, Button } from '@mui/material';
 import { PIIRow } from 'overview/table-component/row-components/pii-row';
-import React, { useState } from 'react';
 
 export const TableRow = ({ employeeId, role, pii, hide }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
     <>
-      <MuiTableRow
-        key={employeeId}
-        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-      >
+      <MuiTableRow key={employeeId}>
         <TableCell>{employeeId}</TableCell>
         <TableCell>{pii.firstName}</TableCell>
         {hide && <TableCell>{role}</TableCell>}

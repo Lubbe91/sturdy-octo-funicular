@@ -1,5 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, ReactNode } from 'react';
 
+/**
+ *
+ * @param {Event} event The input event
+ * @param {ReactNode} param The value of the node that needs to be iterated
+ * @param {Array} array The array that will contain the iterated value of the nodes value
+ * @return {Array} returns an array of string values
+ */
 export const onKeyPress = (event, param, array) => {
   if (event.key === 'Enter') {
     (param as [])?.forEach((event: React.ReactElement) => {
@@ -8,13 +15,24 @@ export const onKeyPress = (event, param, array) => {
   }
 };
 
-export const onLoseFocus = (param, array) => {
+/**
+ *
+ * @param {ReactNode} param The value of the node that needs to be iterated
+ * @param {Array} array The array that will contain the iterated value of the nodes value
+ * @return {Array} returns an array of string values
+ */
+export const onBlur = (param: ReactNode, array: string[]) =>
   (param as [])?.forEach((event: React.ReactElement) => {
     array.push(event.props.label);
   });
-};
 
-export const setEmployeeId = (firstValue, secondValue) =>
+/**
+ *
+ * @param {String} firstValue The first character of the string will be add to det id
+ * @param {String} secondValue The first character of the string will be add to det id
+ * @return {String} returns a string value with 4 digits and the first character of firstValue and secondValue
+ */
+export const setEmployeeId = (firstValue: string, secondValue: string) =>
   Math.floor(1000 + Math.random() * 9000) +
   firstValue.charAt(0).toUpperCase() +
   secondValue.charAt(0).toUpperCase();
@@ -25,7 +43,6 @@ export const setEmployeeId = (firstValue, secondValue) =>
  * @param {Object} defaultValue The value to use if it is not already in localStorage
  * @param {{serialize: Function, deserialize: Function}} options The serialize and deserialize functions to use (defaults to JSON.stringify and JSON.parse respectively)
  */
-
 export const useLocalStorageState = (
   key,
   defaultValue,

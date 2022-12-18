@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   TableCell,
   Collapse,
@@ -8,7 +9,6 @@ import {
   TableBody,
   TableRow,
 } from '@mui/material';
-import React from 'react';
 
 export const PIIRow = ({ expanded, name, gender, email, number }) => (
   <TableRow>

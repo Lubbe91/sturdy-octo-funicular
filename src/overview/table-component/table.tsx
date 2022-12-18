@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Autocomplete,
   Box,
@@ -12,32 +12,39 @@ import {
   useTheme,
 } from '@mui/material';
 
-import { employeeArray, EmployeeArrayProps } from 'employees';
-import { onKeyPress, useLocalStorageState, onLoseFocus } from 'utils';
+import { onKeyPress, useLocalStorageState, onBlur } from 'utils';
 
-import { Tab } from 'overview/tabs';
 import { TableHead } from 'overview/table-component/table-head';
 import { TableRow } from 'overview/table-component/row-components/table-row';
 import { AddEmployee } from 'overview/form-actions/add-employee';
 import { RemoveEmployee } from 'overview/form-actions/remove-employee';
+import { employeeArray, EmployeeArrayProps } from 'data/employees';
+import { Navigation } from 'overview/navigation/navigation';
+import { workshopData } from 'data/workshop';
 
-export const Table = () => {
+export const Table = ({ workshop }) => {
   const theme = useTheme();
   const mediaQuery = useMediaQuery(theme.breakpoints.up('sm'));
 
   const [localStorageArray, setLocalStorageArray] = useLocalStorageState(
-    'employeeArray',
-    employeeArray
+    `employeeArray_${workshop}`,
+    employeeArray[workshop]
   );
 
   const [showEmployees, setShowEmployees] = useState(() => localStorageArray);
   const [searchValue, setSearchValue] = useState([]);
 
+  const autocompleteRef = useRef(null);
+
   useEffect(() => {
-    console.log('searchValue', searchValue);
+    setLocalStorageArray(employeeArray[workshop]);
+    setShowEmployees(employeeArray[workshop]);
+  }, [workshop, setLocalStorageArray]);
+
+  useEffect(() => {
     const searchResultArray = searchValue.length === 0 ? localStorageArray : [];
 
-    employeeArray.forEach((employee) => {
+    localStorageArray.forEach((employee) => {
       searchValue.forEach((searchWord) => {
         if (searchWord === employee.employeeId + ' ' + employee.pii.firstName)
           searchResultArray.push(employee);
@@ -49,10 +56,14 @@ export const Table = () => {
 
   return (
     <Box sx={{ maxWidth: 850, margin: 'auto' }}>
-      <Tab />
+      <Navigation />
+
+      <h1>{workshopData[workshop]?.name}</h1>
+      <p>{workshopData[workshop]?.introText}</p>
 
       <Autocomplete
         sx={{ marginTop: '64px' }}
+        ref={autocompleteRef}
         multiple
         id="tags-outlined"
         options={localStorageArray}
@@ -66,7 +77,7 @@ export const Table = () => {
             InputProps: { startAdornment },
           } = params;
 
-          const inputArray = [];
+          const inputArray: string[] = [];
 
           return (
             <TextField
@@ -76,7 +87,7 @@ export const Table = () => {
                 setSearchValue(inputArray);
               }}
               onBlur={() => {
-                onLoseFocus(startAdornment, inputArray);
+                onBlur(startAdornment, inputArray);
                 setSearchValue(inputArray);
               }}
               label="search employee"
@@ -89,11 +100,12 @@ export const Table = () => {
         <Button
           tabIndex={-1}
           size="small"
-          color="success"
-          onClick={() => setLocalStorageArray(employeeArray)}
+          color="error"
+          onClick={() => setLocalStorageArray(employeeArray[workshop])}
         >
-          reset array(dev)
+          reset array
         </Button>
+
         <TableContainer component={Paper}>
           <MuiTable aria-label="simple table">
             <TableHead hideColumn={mediaQuery} />
@@ -102,6 +114,7 @@ export const Table = () => {
                 <TableRow
                   key={info.employeeId + info.firstName}
                   hide={mediaQuery}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                   {...info}
                 />
               ))}

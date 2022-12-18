@@ -1,3 +1,6 @@
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
 import {
   Button as MuiButton,
   Dialog,
@@ -7,18 +10,14 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material';
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+
 import { setEmployeeId } from 'utils';
 
 export const AddEmployee = ({ employeeArray, setArray, clearSearch }) => {
   const [toggleDialog, setToggleDialog] = useState(false);
-
-  const handleCLick = (close) => () => {
-    setToggleDialog(close ? true : false);
-  };
-
   const { handleSubmit, setValue } = useForm();
+
+  const toggle = (state) => () => setToggleDialog(state === 'open' ?? false);
 
   const onSubmit = (data) => {
     const newEmployee = {
@@ -57,11 +56,11 @@ export const AddEmployee = ({ employeeArray, setArray, clearSearch }) => {
 
   return (
     <>
-      <MuiButton aria-label="addEmployee" onClick={handleCLick(true)}>
+      <MuiButton aria-label="addEmployee" onClick={toggle('open')}>
         Add employee
       </MuiButton>
 
-      <Dialog open={toggleDialog} onClose={handleCLick(false)}>
+      <Dialog open={toggleDialog} onClose={toggle('close')}>
         <DialogTitle>Add Employee</DialogTitle>
 
         <DialogContent>
@@ -92,7 +91,7 @@ export const AddEmployee = ({ employeeArray, setArray, clearSearch }) => {
           <MuiButton form="addEmployee" type="submit">
             Add
           </MuiButton>
-          <MuiButton onClick={handleCLick(false)}>Cancel</MuiButton>
+          <MuiButton onClick={toggle('close')}>Cancel</MuiButton>
         </DialogActions>
       </Dialog>
     </>
