@@ -6,100 +6,120 @@ import {
   Paper,
   Table as MuiTable,
   TableBody,
-  TableCell,
   TableContainer,
-  TableHead,
-  TableRow,
   TextField,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 
-import { employeeArr, EmployeeArrProps } from '../employees';
-import { Row } from './table-row';
+import { employeeArray, EmployeeArrayProps } from 'employees';
+import { onKeyPress, useLocalStorageState, onLoseFocus } from 'utils';
+
+import { Tab } from 'overview/tabs';
+import { TableHead } from 'overview/table-component/table-head';
+import { TableRow } from 'overview/table-component/row-components/table-row';
+import { AddEmployee } from 'overview/form-actions/add-employee';
+import { RemoveEmployee } from 'overview/form-actions/remove-employee';
 
 export const Table = () => {
   const theme = useTheme();
-  const matches = useMediaQuery(theme.breakpoints.up('sm'));
+  const mediaQuery = useMediaQuery(theme.breakpoints.up('sm'));
 
-  const [showEmployees, setShowEmployees] = useState(employeeArr);
-  const [input, setInput] = useState('');
+  const [localStorageArray, setLocalStorageArray] = useLocalStorageState(
+    'employeeArray',
+    employeeArray
+  );
+
+  const [showEmployees, setShowEmployees] = useState(() => localStorageArray);
   const [searchValue, setSearchValue] = useState([]);
 
   useEffect(() => {
-    let arr = searchValue.length === 0 ? employeeArr : [];
-    employeeArr.forEach((ev) => {
-      searchValue.forEach((e) => {
-        if (e === ev.pii.firstName) arr.push(ev);
+    console.log('searchValue', searchValue);
+    const searchResultArray = searchValue.length === 0 ? localStorageArray : [];
+
+    employeeArray.forEach((employee) => {
+      searchValue.forEach((searchWord) => {
+        if (searchWord === employee.employeeId + ' ' + employee.pii.firstName)
+          searchResultArray.push(employee);
       });
     });
 
-    setShowEmployees(arr);
-  }, [searchValue]);
+    setShowEmployees(searchResultArray);
+  }, [localStorageArray, searchValue]);
 
   return (
     <Box sx={{ maxWidth: 850, margin: 'auto' }}>
+      <Tab />
+
       <Autocomplete
         sx={{ marginTop: '64px' }}
         multiple
         id="tags-outlined"
-        options={employeeArr}
-        getOptionLabel={(option: EmployeeArrProps) => option.pii.firstName}
+        options={localStorageArray}
+        getOptionLabel={({
+          pii: { firstName },
+          employeeId,
+        }: EmployeeArrayProps) => employeeId + ' ' + firstName}
         filterSelectedOptions
         renderInput={(params) => {
           const {
             InputProps: { startAdornment },
           } = params;
 
-          let arr = [];
+          const inputArray = [];
 
           return (
             <TextField
               {...params}
               onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  (startAdornment as [])?.forEach((e: React.ReactElement) => {
-                    arr.push(e.props.label);
-                  });
-
-                  setSearchValue(arr);
-                }
+                onKeyPress(e, startAdornment, inputArray);
+                setSearchValue(inputArray);
               }}
-              value={input}
-              onChange={({ target }) => setInput(target.value)}
               onBlur={() => {
-                (startAdornment as [])?.forEach((e: React.ReactElement) => {
-                  arr.push(e.props.label);
-                });
-
-                setSearchValue(arr);
+                onLoseFocus(startAdornment, inputArray);
+                setSearchValue(inputArray);
               }}
-              label="search by first name"
+              label="search employee"
             />
           );
         }}
       />
+
       <Box sx={{ marginTop: '24px' }}>
+        <Button
+          tabIndex={-1}
+          size="small"
+          color="success"
+          onClick={() => setLocalStorageArray(employeeArray)}
+        >
+          reset array(dev)
+        </Button>
         <TableContainer component={Paper}>
           <MuiTable aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell align="left">Employee Id</TableCell>
-                <TableCell align="left">Firstname</TableCell>
-                {matches && <TableCell align="left">Role</TableCell>}
-                <TableCell align="left">PII</TableCell>
-              </TableRow>
-            </TableHead>
+            <TableHead hideColumn={mediaQuery} />
             <TableBody>
-              {showEmployees.map((info, i) => (
-                <Row key={info.customerId} hide={matches} {...info} />
+              {showEmployees.map((info) => (
+                <TableRow
+                  key={info.employeeId + info.firstName}
+                  hide={mediaQuery}
+                  {...info}
+                />
               ))}
             </TableBody>
           </MuiTable>
         </TableContainer>
 
-        <Button>Add employee</Button>
-        <Button>Remove employee</Button>
+        <AddEmployee
+          employeeArray={localStorageArray}
+          setArray={setLocalStorageArray}
+          clearSearch={() => setSearchValue([])}
+        />
+
+        <RemoveEmployee
+          employeeArray={localStorageArray}
+          setArray={setLocalStorageArray}
+          clearSearch={() => setSearchValue([])}
+        />
       </Box>
     </Box>
   );
